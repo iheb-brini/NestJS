@@ -1,20 +1,21 @@
-import { Controller, Get, Post, Param, Body, HttpException, HttpStatus, UsePipes, ValidationPipe, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, HttpException, HttpStatus, UsePipes, ValidationPipe, ParseIntPipe, UseFilters, ConflictException } from '@nestjs/common';
 import { Observable, of } from 'rxjs';
 import { CreateCatDto } from './dto';
 import { CatsService } from './cats.service';
-import { JoiValidationPipe } from 'src/common/validators/joi-validation.pipe';
+import { JoiValidationPipe } from '../common/validators/joi-validation.pipe';
+import { ForbiddenException } from '../common/exceptions/forbidden.exception';
+import { HttpExceptionFilter } from '../common/exceptions/http-exception.filter';
 
 @Controller('cats')
+@UseFilters(HttpExceptionFilter)
 export class CatsController {
     constructor(private readonly catsService: CatsService) {
 
     }
     @Get('/error')
+    //@UseFilters(HttpExceptionFilter)
     async testError() {
-        throw new HttpException({
-            status: HttpStatus.FORBIDDEN,
-            error: 'This is a custom message',
-        }, 403);
+        throw new ForbiddenException();
     }
 
     @Get('/age/:age')
@@ -30,6 +31,7 @@ export class CatsController {
     @Get()
     async findAll(): Promise<any[]> {
         return this.catsService.findAll();
+        //throw new ConflictException();
     }
 
     @Post()
